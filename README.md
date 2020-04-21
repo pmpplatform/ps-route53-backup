@@ -148,3 +148,41 @@ To enable encryption feature:
     ```
 
   * (Optional): `$GITCRYPT_PRIVATE_KEY` and `$GITCRYPT_SYMMETRIC_KEY` variables are the combination of path where `Secret` volume is mounted and the name of item key from that object. If you change any value of them from the above example you may need to set this variables accordingly.
+
+# cli53 - Command line tool for Amazon Route 53
+
+[barnybug/cli53](https://github.com/barnybug/cli53)
+
+## Installation
+
+Installation is easy, just download the binary from the github releases page (builds are available for Linux, Mac and Windows):
+https://github.com/barnybug/cli53/releases/latest
+
+    $ sudo mv cli53-my-platform /usr/local/bin/cli53
+    $ sudo chmod +x /usr/local/bin/cli53
+
+Alternatively, on Mac you can install it using homebrew
+
+    $ brew install cli53
+
+To configure your Amazon credentials, either place them in a file `~/.aws/credentials`:
+
+	[default]
+	aws_access_key_id = AKID1234567890
+	aws_secret_access_key = MY-SECRET-KEY
+
+Or set the environment variables: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+
+### Using cli53 to import a zone backup from ps-route53-backup
+
+Import a BIND zone file:
+
+	$ cli53 import --file zonefile.txt example.com
+
+Replace with an imported zone, waiting for completion:
+
+	$ cli53 import --file zonefile.txt --replace --wait example.com
+
+Also you can 'dry-run' import, to check what will happen:
+
+	$ cli53 import --file zonefile.txt --replace --wait --dry-run example.com
