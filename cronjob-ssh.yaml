@@ -1,0 +1,62 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    app: route53-backup
+  name: route53-backup
+  namespace: kube-system
+spec:
+  schedule: '*/10 * * * *'
+  concurrencyPolicy: Replace
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: route53-backup
+          name: route53-backup
+        spec:
+          containers:
+          - env:
+            - name: GIT_REPO
+              value: git@git.example.com:infra/route53-backups.git
+            - name: GITCRYPT_ENABLE
+              value: "true"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: route53-backup-aws
+                  key: aws_access_key_id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: route53-backup-aws
+                  key: aws_secret_access_key
+            image: pasientskyhosting/ps-route53-backup:v1.0.0
+            imagePullPolicy: Always
+            name: ps-route53-backup
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+            - mountPath: /backup/.ssh
+              name: sshkey
+            - mountPath: /secrets
+              name: gpgkey
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+          volumes:
+          - name: gpgkey
+            secret:
+              defaultMode: 420
+              secretName: route53-backup-gpg
+          - name: sshkey
+            secret:
+              defaultMode: 420
+              secretName: route53-backup-ssh
+          - emptyDir: {}
+            name: cache

@@ -1,0 +1,22 @@
+# Trigger the workflow on pull request activity
+name: Integration
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+
+  pre_commit_job:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+
+      - uses: actions/checkout@master
+
+      - uses: pasientskyhosting/github-actions/pre-commit@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
